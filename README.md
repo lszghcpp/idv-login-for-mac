@@ -15,5 +15,5 @@
 
 ## 4. 鸣谢名单
 
-~~1.感谢openai的技术支持~~
-2.感谢Alexander-Porter提供的基础代码
+- ~~1.感谢openai的技术支持~~
+- 2.感谢Alexander-Porter提供的基础代码
