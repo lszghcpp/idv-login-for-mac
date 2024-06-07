@@ -49,7 +49,7 @@ def handle_exit():
         m_hostmgr.remove(genv.get("DOMAIN_TARGET"))
     os.system("pause")
 
-
+"""
 def initialize():
     # if we don't have enough privileges, relaunch as administrator
     if ctypes.windll.shell32.IsUserAnAdmin() == 0:
@@ -122,7 +122,85 @@ def initialize():
     else:
         with open(genv.get("FP_CONFIG"), "r") as f:
             genv.set("CONFIG", json.load(f))
+"""
 
+
+def is_admin():
+    try:
+        return ctypes.windll.shell32.IsUserAnAdmin()
+    except AttributeError:
+        return os.geteuid() == 0
+
+def initialize():
+    if not is_admin():
+        if sys.platform == "win32":
+            ctypes.windll.shell32.ShellExecuteW(
+                None, "runas", sys.executable, " ".join(sys.argv), None, 1
+            )
+        else:
+            print("You need to run this script with sudo.")
+        sys.exit()
+
+    # Initialize the global vars at first
+    genv.set("DOMAIN_TARGET", "service.mkey.163.com")
+    genv.set("FP_WEBCERT", os.path.join(genv.get("FP_WORKDIR"), "domain_cert_2.pem"))
+    genv.set("FP_CONFIG", os.path.join(genv.get("FP_WORKDIR"), "config.json"))
+    genv.set("FP_FAKE_DEVICE", os.path.join(genv.get("FP_WORKDIR"), "fakeDevice.json"))
+    genv.set("FP_WEBKEY", os.path.join(genv.get("FP_WORKDIR"), "domain_key_2.pem"))
+    genv.set("FP_CACERT", os.path.join(genv.get("FP_WORKDIR"), "root_ca.pem"))
+    genv.set("FP_CHANNEL_RECORD", os.path.join(genv.get("FP_WORKDIR"), "channels.json"))
+    genv.set("CHANNEL_ACCOUNT_SELECTED", "")
+
+    # Handle exit
+    atexit.register(handle_exit)
+    signal.signal(signal.SIGTERM, handle_exit)
+    signal.signal(signal.SIGINT, handle_exit)
+
+    # Initialize object
+    global m_certmgr, m_hostmgr, m_proxy
+    m_certmgr = certmgr()
+    m_hostmgr = hostmgr()
+    m_proxy = proxymgr()
+
+    # Initialize workpath
+    if not os.path.exists(genv.get("FP_WORKDIR")):
+        os.mkdir(genv.get("FP_WORKDIR"))
+
+    os.chdir(os.path.join(genv.get("FP_WORKDIR")))
+
+    genv.set("CHANNELS_HELPER", ChannelManager())
+
+    # Disable warnings for requests
+    requests.packages.urllib3.disable_warnings()
+
+    if not os.path.exists(genv.get("FP_FAKE_DEVICE")):
+        udid = "".join(random.choices(string.hexdigits, k=16))
+        sdkDevice = {
+            "device_model": "M2102K1AC",
+            "os_name": "android",
+            "os_ver": "12",
+            "udid": udid,
+            "app_ver": "157",
+            "imei": "".join(random.choices(string.digits, k=15)),
+            "country_code": "CN",
+            "is_emulator": 0,
+            "is_root": 0,
+            "oaid": "",
+        }
+        with open(genv.get("FP_FAKE_DEVICE"), "w") as f:
+            json.dump(sdkDevice, f)
+    else:
+        with open(genv.get("FP_FAKE_DEVICE"), "r") as f:
+            sdkDevice = json.load(f)
+    genv.set("FAKE_DEVICE", sdkDevice)
+
+    if not os.path.exists(genv.get("FP_CONFIG")):
+        with open(genv.get("FP_CONFIG"), "w") as f:
+            json.dump({}, f)
+            genv.set("CONFIG", {})
+    else:
+        with open(genv.get("FP_CONFIG"), "r") as f:
+            genv.set("CONFIG", json.load(f))
 
 def welcome():
     print("[+] 欢迎使用第五人格登陆助手 version 5.2.2-beta")
