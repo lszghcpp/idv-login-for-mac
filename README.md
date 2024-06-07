@@ -2,7 +2,7 @@
 
 ## 1. 使用方式
 
-克隆后直接运行src中的main.py，然后使用crossover启动pc版即可，crossover安装pc版客户端详细请看[此处]([https://markdown.com.cn)](https://wiki.biligame.com/dwrg/%E9%9D%9EWindows%E7%B3%BB%E7%BB%9FPC%E7%AB%AF%E5%AE%89%E8%A3%85%E6%95%99%E7%A8%8B)。
+克隆后直接运行src中的main.py，然后使用crossover启动pc版即可，crossover安装pc版客户端详细请看[此处](https://wiki.biligame.com/dwrg/%E9%9D%9EWindows%E7%B3%BB%E7%BB%9FPC%E7%AB%AF%E5%AE%89%E8%A3%85%E6%95%99%E7%A8%8B)。
 ## 2. 注意事项
 - 需手动设置PROGRAMDATA环境变量，随便指向一个你自己想要的路径即可
 - 此脚本需root权限运行
